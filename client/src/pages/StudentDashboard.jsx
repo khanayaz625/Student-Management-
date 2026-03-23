@@ -21,10 +21,10 @@ const StudentDashboard = () => {
     const fetchDashboardData = async () => {
         try {
             const [taskRes, attRes, subRes, leaderRes] = await Promise.all([
-                axios.get('http://localhost:5000/api/tasks/today'),
-                axios.get('http://localhost:5000/api/attendance/my'),
-                axios.get('http://localhost:5000/api/submissions/my'),
-                axios.get('http://localhost:5000/api/users/leaderboard')
+                axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tasks/today`),
+                axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/attendance/my`),
+                axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/submissions/my`),
+                axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/users/leaderboard`)
             ]);
 
             setTask(taskRes.data);

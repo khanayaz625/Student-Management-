@@ -16,8 +16,8 @@ const TeacherDashboard = () => {
     const fetchDashboardData = async () => {
         try {
             const [studentsRes, tasksRes] = await Promise.all([
-                axios.get('http://localhost:5000/api/users/students'),
-                axios.get('http://localhost:5000/api/tasks/all')
+                axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/users/students`),
+                axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tasks/all`)
             ]);
 
             setStats({
@@ -34,7 +34,7 @@ const TeacherDashboard = () => {
     const handleDeleteTask = async (id) => {
         if (!window.confirm('Are you sure you want to delete this task?')) return;
         try {
-            await axios.delete(`http://localhost:5000/api/tasks/${id}`);
+            await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tasks/${id}`);
             setRecentTasks(recentTasks.filter(t => t._id !== id));
         } catch (err) {
             alert('Error deleting task: ' + (err.response?.data?.message || err.message));
@@ -50,7 +50,7 @@ const TeacherDashboard = () => {
     const handleUpdate = async (e) => {
         e.preventDefault();
         try {
-            const { data } = await axios.put(`http://localhost:5000/api/tasks/${editingTask}`, editForm);
+            const { data } = await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tasks/${editingTask}`, editForm);
             setRecentTasks(recentTasks.map(t => t._id === editingTask ? data : t));
             setEditingTask(null);
         } catch (err) {

@@ -31,7 +31,7 @@ const Profile = () => {
         setMessage('');
         try {
             const skillsArray = formData.skills.split(',').map(s => s.trim()).filter(s => s !== '');
-            const { data } = await axios.put('http://localhost:5000/api/users/profile', {
+            const { data } = await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/users/profile`, {
                 ...formData,
                 skills: skillsArray
             });

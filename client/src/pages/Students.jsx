@@ -18,7 +18,7 @@ const Students = () => {
 
     const fetchStudents = async () => {
         try {
-            const { data } = await axios.get('http://localhost:5000/api/users/students');
+            const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/users/students`);
             setStudents(data);
         } catch (err) {
             console.error(err);
@@ -30,7 +30,7 @@ const Students = () => {
     const handleDelete = async (id) => {
         if (!window.confirm('Are you sure you want to remove this student? All their data will be lost.')) return;
         try {
-            await axios.delete(`http://localhost:5000/api/users/${id}`);
+            await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/users/${id}`);
             fetchStudents();
         } catch (err) {
             alert('Error deleting student');
@@ -40,7 +40,7 @@ const Students = () => {
     const handleAddStudent = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('http://localhost:5000/api/auth/register', { ...newStudent, role: 'student' });
+            await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/register`, { ...newStudent, role: 'student' });
             setShowAddModal(false);
             setNewStudent({ name: '', email: '', enrollmentNo: '', technology: '', password: 'student123' });
             fetchStudents();
@@ -52,7 +52,7 @@ const Students = () => {
     const viewSubmissions = async (student) => {
         setSelectedStudent(student);
         try {
-            const { data } = await axios.get(`http://localhost:5000/api/submissions/student/${student._id}`);
+            const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/submissions/student/${student._id}`);
             setStudentSubmissions(data);
             setShowSubmissionModal(true);
         } catch (err) {
@@ -64,7 +64,7 @@ const Students = () => {
     const handleAIReview = async (submissionId) => {
         setLoading(true);
         try {
-            const { data } = await axios.post(`http://localhost:5000/api/submissions/ai-review/${submissionId}`);
+            const { data } = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/submissions/ai-review/${submissionId}`);
             setStudentSubmissions(studentSubmissions.map(s => s._id === submissionId ? data : s));
             alert('AI Review completed!');
         } catch (err) {
@@ -78,7 +78,7 @@ const Students = () => {
         const score = document.getElementById(`score-${submissionId}`).value;
         const feedback = document.getElementById(`feedback-${submissionId}`).value;
         try {
-            const { data } = await axios.put(`http://localhost:5000/api/submissions/review/${submissionId}`, {
+            const { data } = await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/submissions/review/${submissionId}`, {
                 score, feedback
             });
             setStudentSubmissions(studentSubmissions.map(s => s._id === submissionId ? data : s));

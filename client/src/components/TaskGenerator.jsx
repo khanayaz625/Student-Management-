@@ -14,7 +14,7 @@ const TaskGenerator = ({ onTaskCreated }) => {
         setLoading(true);
         setError('');
         try {
-            const { data } = await axios.post('http://localhost:5000/api/tasks/generate', {
+            const { data } = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tasks/generate`, {
                 topic, difficulty, deadline
             });
             onTaskCreated(data);

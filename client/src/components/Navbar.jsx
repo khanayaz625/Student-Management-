@@ -20,7 +20,7 @@ const Navbar = () => {
 
   const fetchNotifications = async () => {
     try {
-      const { data } = await axios.get('http://localhost:5000/api/notifications');
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/notifications`);
       setNotifications(data);
     } catch (error) {
       console.error('Error fetching notifications');
@@ -29,7 +29,7 @@ const Navbar = () => {
 
   const markAsRead = async (id) => {
     try {
-      await axios.put(`http://localhost:5000/api/notifications/${id}/read`);
+      await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/notifications/${id}/read`);
       setNotifications(notifications.map(n => n._id === id ? { ...n, isRead: true } : n));
     } catch (error) {
       console.error('Error marking as read');
@@ -38,7 +38,7 @@ const Navbar = () => {
 
   const markAllRead = async () => {
     try {
-      await axios.put('http://localhost:5000/api/notifications/read-all');
+      await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/notifications/read-all`);
       setNotifications(notifications.map(n => ({ ...n, isRead: true })));
     } catch (error) {
       console.error('Error marking all as read');
