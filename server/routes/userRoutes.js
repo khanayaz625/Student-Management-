@@ -68,6 +68,23 @@ router.get('/students', protect, teacherOnly, async (req, res) => {
     }
 });
 
+// Add Staff Member (Teacher)
+router.post('/add-staff', protect, teacherOnly, async (req, res) => {
+    const { name, email, password, technology } = req.body;
+    try {
+        const userExists = await User.findOne({ email });
+        if (userExists) return res.status(400).json({ message: 'User already exists' });
+
+        const user = await User.create({
+            name, email, password, role: 'teacher', technology
+        });
+
+        res.status(201).json({ message: 'Staff member added successfully', user: { name: user.name, email: user.email } });
+    } catch (error) {
+        res.status(500).json({ message: 'Error adding staff', error: error.message });
+    }
+});
+
 // Leaderboard Logic
 router.get('/leaderboard', protect, async (req, res) => {
     try {

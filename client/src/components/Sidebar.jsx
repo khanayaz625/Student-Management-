@@ -46,14 +46,6 @@ const Sidebar = () => {
             ))}
           </div>
 
-          <div className="sidebar-promo">
-            <div className="promo-card">
-              <div className="spark-icon"><Sparkles size={16} /></div>
-              <h4>DigiSkill AI</h4>
-              <p>Upgrade to Pro for personalized tutoring</p>
-              <button className="upgrade-btn">View Plans</button>
-            </div>
-          </div>
         </div>
 
         <style jsx>{`

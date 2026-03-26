@@ -128,6 +128,9 @@ const Login = () => {
                     position: relative;
                     z-index: 1;
                     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+                    background: rgba(15, 23, 42, 0.8) !important;
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    border-radius: 20px;
                 }
 
                 .login-header {

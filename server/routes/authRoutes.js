@@ -8,7 +8,8 @@ const generateToken = (id) => {
 };
 
 router.post('/register', async (req, res) => {
-    const { name, email, password, role, enrollmentNo, technology } = req.body;
+    const { name, email, password, enrollmentNo, technology } = req.body;
+    const role = 'student'; // Force role to student for public registration
     try {
         const userExists = await User.findOne({ email });
         if (userExists) return res.status(400).json({ message: 'User already exists' });

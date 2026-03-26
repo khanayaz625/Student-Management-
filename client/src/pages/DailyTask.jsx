@@ -5,6 +5,7 @@ import { CheckCircle, Send, Loader2, AlertCircle } from 'lucide-react';
 
 const DailyTask = () => {
     const { user } = useAuth();
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
     const [task, setTask] = useState(null);
     const [answers, setAnswers] = useState([]);
     const [status, setStatus] = useState('idle'); // idle, loading, submitted, error
@@ -24,7 +25,7 @@ const DailyTask = () => {
 
     const fetchTask = async () => {
         try {
-            const { data } = await axios.get('http://localhost:5000/api/tasks/today');
+            const { data } = await axios.get(`${apiUrl}/api/tasks/today`);
             setTask(data);
             if (data) {
                 setAnswers(data.questions.map((_, i) => ({ questionIndex: i, answer: '' })));
@@ -36,7 +37,7 @@ const DailyTask = () => {
 
     const fetchMySubmission = async () => {
         try {
-            const { data } = await axios.get('http://localhost:5000/api/submissions/my');
+            const { data } = await axios.get(`${apiUrl}/api/submissions/my`);
             const sub = data.find(s => s.taskId?._id === task._id);
             if (sub) {
                 setSubmission(sub);
@@ -63,7 +64,7 @@ const DailyTask = () => {
         }
         setStatus('loading');
         try {
-            const { data } = await axios.post('http://localhost:5000/api/submissions', {
+            const { data } = await axios.post(`${apiUrl}/api/submissions`, {
                 taskId: task._id,
                 answers
             });

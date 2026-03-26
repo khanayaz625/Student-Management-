@@ -8,6 +8,20 @@ const TeacherDashboard = () => {
     const [recentTasks, setRecentTasks] = useState([]);
     const [editingTask, setEditingTask] = useState(null);
     const [editForm, setEditForm] = useState({ topic: '', deadline: '' });
+    const [showStaffModal, setShowStaffModal] = useState(false);
+    const [staffForm, setStaffForm] = useState({ name: '', email: '', password: '', technology: '' });
+
+    const handleAddStaff = async (e) => {
+        e.preventDefault();
+        try {
+            await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/users/add-staff`, staffForm);
+            alert('Staff member added successfully!');
+            setShowStaffModal(false);
+            setStaffForm({ name: '', email: '', password: '', technology: '' });
+        } catch (err) {
+            alert('Error adding staff: ' + (err.response?.data?.message || err.message));
+        }
+    };
 
     useEffect(() => {
         fetchDashboardData();
@@ -66,7 +80,10 @@ const TeacherDashboard = () => {
                     <h1>Teacher Overview</h1>
                     <p>Monitoring your classroom's performance and assignments</p>
                 </div>
-                <div className="header-actions">
+                <div className="header-actions" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                    <button className="btn-primary" onClick={() => setShowStaffModal(true)} style={{ padding: '8px 16px', fontSize: '0.9rem' }}>
+                        + Add Staff
+                    </button>
                     <span className="live-indicator">
                         <span className="dot"></span> Live Data
                     </span>
@@ -170,6 +187,24 @@ const TeacherDashboard = () => {
                 </section>
             </div>
 
+            {showStaffModal && (
+                <div className="modal-overlay">
+                    <div className="modal-content glass-card card">
+                        <div className="modal-header">
+                            <h3>Add Staff Member</h3>
+                            <button onClick={() => setShowStaffModal(false)} className="close-btn"><X size={20} /></button>
+                        </div>
+                        <form onSubmit={handleAddStaff} className="staff-form">
+                            <input type="text" placeholder="Name" required value={staffForm.name} onChange={e => setStaffForm({ ...staffForm, name: e.target.value })} />
+                            <input type="email" placeholder="Email" required value={staffForm.email} onChange={e => setStaffForm({ ...staffForm, email: e.target.value })} />
+                            <input type="password" placeholder="Password" required value={staffForm.password} onChange={e => setStaffForm({ ...staffForm, password: e.target.value })} />
+                            <input type="text" placeholder="Technology (Optional)" value={staffForm.technology} onChange={e => setStaffForm({ ...staffForm, technology: e.target.value })} />
+                            <button type="submit" className="btn-primary">Create Staff Account</button>
+                        </form>
+                    </div>
+                </div>
+            )}
+
             <style jsx>{`
                 .dashboard-wrapper { padding: 10px 0; }
                 .page-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px; }
@@ -235,6 +270,15 @@ const TeacherDashboard = () => {
                     .task-status-box { width: 100%; justify-content: space-between; }
                     .hover-actions { opacity: 1; }
                 }
+
+                .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 1000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+                .modal-content { width: 400px; padding: 25px; border-radius: 16px; background: rgba(15, 23, 42, 0.95); }
+                .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+                .close-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; }
+                .close-btn:hover { color: var(--danger); }
+                .staff-form { display: flex; flex-direction: column; gap: 15px; }
+                .staff-form input { padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: rgba(15, 23, 42, 0.6); color: white; outline: none; }
+                .staff-form input:focus { border-color: var(--primary); }
             `}</style>
         </div>
     );

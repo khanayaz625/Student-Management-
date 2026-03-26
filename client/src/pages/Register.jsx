@@ -84,25 +84,7 @@ const Register = () => {
                         </div>
                     </div>
 
-                    <div className="role-selector">
-                        <label className={formData.role === 'student' ? 'active' : ''}>
-                            <input
-                                type="radio" name="role" value="student"
-                                checked={formData.role === 'student'} onChange={handleChange}
-                            />
-                            Student
-                        </label>
-                        <label className={formData.role === 'teacher' ? 'active' : ''}>
-                            <input
-                                type="radio" name="role" value="teacher"
-                                checked={formData.role === 'teacher'} onChange={handleChange}
-                            />
-                            Teacher
-                        </label>
-                    </div>
-
-                    {formData.role === 'student' && (
-                        <div className="student-fields animate-fade">
+                    <div className="student-fields animate-fade">
                             <div className="row">
                                 <div className="field-group">
                                     <label>Enrollment No.</label>
@@ -147,7 +129,6 @@ const Register = () => {
                                 </div>
                             )}
                         </div>
-                    )}
 
                     <button type="submit" className="btn-primary register-btn" disabled={loading}>
                         {loading ? <Loader2 className="animate-spin" /> : (
@@ -211,6 +192,9 @@ const Register = () => {
                     position: relative;
                     z-index: 1;
                     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+                    background: rgba(15, 23, 42, 0.8) !important;
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    border-radius: 20px;
                 }
 
                 .register-header {

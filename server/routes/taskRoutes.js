@@ -60,12 +60,7 @@ router.get('/today', protect, async (req, res) => {
     today.setHours(0, 0, 0, 0);
 
     try {
-        const task = await Task.findOne({
-            date: {
-                $gte: today,
-                $lt: new Date(today.getTime() + 24 * 60 * 60 * 1000)
-            }
-        });
+        const task = await Task.findOne().sort({ createdAt: -1 });
         res.json(task);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching today task' });

@@ -16,9 +16,10 @@ const AttendanceAdmin = () => {
     const fetchInitialData = async () => {
         setLoading(true);
         try {
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
             const [studentsRes, attendanceRes] = await Promise.all([
-                axios.get('http://localhost:5000/api/users/students'),
-                axios.get(`http://localhost:5000/api/attendance/by-date/${selectedDate}`)
+                axios.get(`${apiUrl}/api/users/students`),
+                axios.get(`${apiUrl}/api/attendance/by-date/${selectedDate}`)
             ]);
             setStudents(studentsRes.data);
             setAttendanceData(attendanceRes.data);
