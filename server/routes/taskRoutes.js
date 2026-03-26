@@ -16,19 +16,8 @@ router.post('/generate', protect, teacherOnly, async (req, res) => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        // One task per day check
-        const existingTask = await Task.findOne({
-            technology: technology || 'All',
-            date: {
-                $gte: today,
-                $lt: new Date(today.getTime() + 24 * 60 * 60 * 1000)
-            }
-        });
-
-        if (existingTask) {
-            return res.status(400).json({ message: 'A task for today already exists.' });
-        }
-
+        // Multiple tasks allowed per day now
+        
         const task = await Task.create({
             teacherId: req.user._id,
             topic,
@@ -64,10 +53,19 @@ router.get('/today', protect, async (req, res) => {
 
     try {
         const filter = req.user.role === 'student' ? {
-            $or: [{ technology: req.user.technology }, { technology: 'All' }]
-        } : {};
-        const task = await Task.findOne(filter).sort({ createdAt: -1 });
-        res.json(task);
+            $or: [{ technology: req.user.technology }, { technology: 'All' }],
+            date: {
+                $gte: today,
+                $lt: new Date(today.getTime() + 24 * 60 * 60 * 1000)
+            }
+        } : {
+            date: {
+                $gte: today,
+                $lt: new Date(today.getTime() + 24 * 60 * 60 * 1000)
+            }
+        };
+        const tasks = await Task.find(filter).sort({ createdAt: -1 });
+        res.json(tasks);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching today task' });
     }
