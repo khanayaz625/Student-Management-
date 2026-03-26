@@ -14,15 +14,7 @@ const DailyTask = () => {
     const [submissions, setSubmissions] = useState([]); // Store all submissions for this user
     const [isEditing, setIsEditing] = useState(false);
 
-    useEffect(() => {
-        fetchTask();
-    }, []);
-
-    useEffect(() => {
-        if (task) {
-            fetchMySubmission();
-        }
-    }, [task]);
+    // Submission fetching is now handled inside fetchTask and handleSelectTask
 
     const fetchTask = async () => {
         setStatus('fetching');
@@ -68,20 +60,9 @@ const DailyTask = () => {
         }
     };
 
-    const fetchMySubmission = async () => {
-        try {
-            const { data } = await axios.get(`${apiUrl}/api/submissions/my`);
-            const sub = data.find(s => s.taskId?._id === task._id);
-            if (sub) {
-                setSubmission(sub);
-                if (sub.answers && sub.answers.length > 0) {
-                    setAnswers(sub.answers);
-                }
-            }
-        } catch (err) {
-            console.error(err);
-        }
-    };
+    useEffect(() => {
+        fetchTask();
+    }, []);
 
     const handleAnswerChange = (index, val) => {
         const newAnswers = [...answers];
@@ -118,9 +99,6 @@ const DailyTask = () => {
             setStatus('error');
             const errMsg = err.response?.data?.message || "Error submitting task";
             alert(errMsg);
-            if (errMsg.includes('already submitted')) {
-                fetchMySubmission();
-            }
         }
     };
 
@@ -150,7 +128,9 @@ const DailyTask = () => {
         </div>
     );
 
-    const totalProgress = answers.reduce((acc, curr) => acc + calculateAccuracy(curr.answer), 0) / (answers.length || 1);
+    const totalProgress = (answers && answers.length > 0) 
+        ? answers.reduce((acc, curr) => acc + calculateAccuracy(curr?.answer), 0) / answers.length 
+        : 0;
 
     return (
         <div className="task-hub">
