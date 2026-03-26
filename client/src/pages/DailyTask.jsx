@@ -121,10 +121,20 @@ const DailyTask = () => {
         </div>
     );
 
+    if (status === 'error') return (
+        <div className="loader-state main-loader">
+            <AlertCircle size={48} color="var(--danger)" />
+            <p>Heads up! We couldn't fetch your tasks. Please try refreshing.</p>
+            <button className="btn-outline" onClick={fetchTask} style={{ marginTop: '1rem' }}>Retry Now</button>
+        </div>
+    );
+
+    if (!user) return null; // Wait for user
+
     if (tasks.length === 0) return (
         <div className="loader-state main-loader">
             <AlertCircle size={48} color="var(--text-muted)" />
-            <p>No tasks assigned for your group today yet.</p>
+            <p>No tasks assigned for your tech group ({user?.technology || 'General'}) today yet.</p>
         </div>
     );
 

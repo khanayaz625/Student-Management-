@@ -53,7 +53,10 @@ router.get('/today', protect, async (req, res) => {
 
     try {
         const filter = req.user.role === 'student' ? {
-            $or: [{ technology: req.user.technology }, { technology: 'All' }],
+            $or: [
+                { technology: { $regex: new RegExp(`^${req.user.technology}$`, 'i') } },
+                { technology: 'All' }
+            ],
             date: {
                 $gte: today,
                 $lt: new Date(today.getTime() + 24 * 60 * 60 * 1000)
