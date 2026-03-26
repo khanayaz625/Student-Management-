@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
+import api from '../utils/api';
 import axios from 'axios';
 
 const AuthContext = createContext();
@@ -9,10 +10,8 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         if (user) {
-            axios.defaults.headers.common['Authorization'] = `Bearer ${user.token}`;
             localStorage.setItem('user', JSON.stringify(user));
         } else {
-            delete axios.defaults.headers.common['Authorization'];
             localStorage.removeItem('user');
         }
     }, [user]);
@@ -20,8 +19,7 @@ export const AuthProvider = ({ children }) => {
     const login = async (email, password) => {
         setLoading(true);
         try {
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-            const { data } = await axios.post(`${apiUrl}/api/auth/login`, { email, password });
+            const { data } = await api.post('/api/auth/login', { email, password });
             setUser(data);
             return data;
         } catch (error) {
@@ -34,8 +32,7 @@ export const AuthProvider = ({ children }) => {
     const register = async (userData) => {
         setLoading(true);
         try {
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-            const { data } = await axios.post(`${apiUrl}/api/auth/register`, userData);
+            const { data } = await api.post('/api/auth/register', userData);
             setUser(data);
             return data;
         } catch (error) {

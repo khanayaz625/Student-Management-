@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
+// import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { CheckCircle, Send, Loader2, AlertCircle } from 'lucide-react';
 
 const DailyTask = () => {
     const { user } = useAuth();
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
     const [tasks, setTasks] = useState([]);
     const [selectedTask, setSelectedTask] = useState(null);
     const [answers, setAnswers] = useState([]);
@@ -20,8 +20,8 @@ const DailyTask = () => {
         setStatus('fetching');
         try {
             const [tasksRes, subRes] = await Promise.all([
-                axios.get(`${apiUrl}/api/tasks/today`),
-                axios.get(`${apiUrl}/api/submissions/my`)
+                api.get('/api/tasks/today'),
+                api.get('/api/submissions/my')
             ]);
             
             setSubmissions(subRes.data);
@@ -78,7 +78,7 @@ const DailyTask = () => {
         }
         setStatus('loading');
         try {
-            const { data } = await axios.post(`${apiUrl}/api/submissions`, {
+            const { data } = await api.post('/api/submissions', {
                 taskId: selectedTask._id,
                 answers
             });

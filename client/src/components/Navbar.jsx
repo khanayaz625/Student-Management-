@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { LogOut, Bell, Sun, Moon, Menu, X, CheckSquare, MessageSquare, ChevronDown } from 'lucide-react';
-import axios from 'axios';
+import api from '../utils/api';
+// import axios from 'axios';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -34,7 +35,7 @@ const Navbar = () => {
 
   const checkAttendance = async () => {
     try {
-      const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/attendance/my`);
+      const { data } = await api.get('/api/attendance/my');
       const today = new Date().toISOString().split('T')[0];
       const marked = data.some(a => a.date === today);
       setIsAttendanceMarked(marked);
@@ -46,7 +47,7 @@ const Navbar = () => {
   const markAttendance = async () => {
     setMarkingAttendance(true);
     try {
-      await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/attendance/mark`);
+      await api.post('/api/attendance/mark');
       setIsAttendanceMarked(true);
       alert('Attendance marked successfully!');
     } catch (error) {
@@ -58,7 +59,7 @@ const Navbar = () => {
 
   const fetchNotifications = async () => {
     try {
-      const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/notifications`);
+      const { data } = await api.get('/api/notifications');
       setNotifications(data);
     } catch (error) {
       console.error('Error fetching notifications');
@@ -67,7 +68,7 @@ const Navbar = () => {
 
   const markAsRead = async (id) => {
     try {
-      await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/notifications/${id}/read`);
+      await api.put(`/api/notifications/${id}/read`);
       setNotifications(notifications.map(n => n._id === id ? { ...n, isRead: true } : n));
     } catch (error) {
       console.error('Error marking as read');
@@ -76,7 +77,7 @@ const Navbar = () => {
 
   const markAllRead = async () => {
     try {
-      await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/notifications/clear-all`);
+      await api.delete('/api/notifications/clear-all');
       setNotifications([]);
     } catch (error) {
       console.error('Error clearing all notifications');
