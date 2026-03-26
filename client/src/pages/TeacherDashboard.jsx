@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import TaskGenerator from '../components/TaskGenerator';
-import { Users, ClipboardList, CheckCircle, TrendingUp, Trash2, Edit2, X, Save, ArrowRight } from 'lucide-react';
+import { Users, ClipboardList, CheckCircle, TrendingUp, Trash2, Edit2, X, Save, ArrowRight, Loader2 } from 'lucide-react';
 
 const TeacherDashboard = () => {
     const [stats, setStats] = useState({ students: 0, tasks: 0, pending: 0 });
@@ -10,6 +10,7 @@ const TeacherDashboard = () => {
     const [editForm, setEditForm] = useState({ topic: '', deadline: '' });
     const [showStaffModal, setShowStaffModal] = useState(false);
     const [staffForm, setStaffForm] = useState({ name: '', email: '', password: '', technology: '' });
+    const [loading, setLoading] = useState(true);
 
     const handleAddStaff = async (e) => {
         e.preventDefault();
@@ -28,6 +29,7 @@ const TeacherDashboard = () => {
     }, []);
 
     const fetchDashboardData = async () => {
+        setLoading(true);
         try {
             const [studentsRes, tasksRes] = await Promise.all([
                 axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/users/students`),
@@ -42,6 +44,8 @@ const TeacherDashboard = () => {
             setRecentTasks(tasksRes.data.slice(0, 10));
         } catch (err) {
             console.error('Error fetching dashboard data', err);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -90,102 +94,111 @@ const TeacherDashboard = () => {
                 </div>
             </header>
 
-            <div className="stats-container">
-                <div className="stat-card-premium">
-                    <div className="stat-main">
-                        <div className="stat-label">Students</div>
-                        <div className="stat-value">{stats.students}</div>
-                    </div>
-                    <div className="stat-icon-box blue"><Users /></div>
-                    <div className="stat-trend positive">+12% from last month</div>
+            {loading ? (
+                <div className="loader-state main-loader">
+                    <Loader2 className="animate-spin" size={48} color="var(--primary)" />
+                    <p>Fetching classroom data...</p>
                 </div>
-
-                <div className="stat-card-premium">
-                    <div className="stat-main">
-                        <div className="stat-label">Total Tasks</div>
-                        <div className="stat-value">{stats.tasks}</div>
-                    </div>
-                    <div className="stat-icon-box purple"><ClipboardList /></div>
-                    <div className="stat-trend positive">+5 new today</div>
-                </div>
-
-                <div className="stat-card-premium">
-                    <div className="stat-main">
-                        <div className="stat-label">Pending Reviews</div>
-                        <div className="stat-value">{stats.pending}</div>
-                    </div>
-                    <div className="stat-icon-box orange"><CheckCircle /></div>
-                    <div className="stat-trend negative">Requires attention</div>
-                </div>
-
-                <div className="stat-card-premium">
-                    <div className="stat-main">
-                        <div className="stat-label">Avg. Engagement</div>
-                        <div className="stat-value">84%</div>
-                    </div>
-                    <div className="stat-icon-box green"><TrendingUp /></div>
-                    <div className="stat-trend positive">Above average</div>
-                </div>
-            </div>
-
-            <div className="dashboard-grid">
-                <section className="generator-pane">
-                    <div className="card glass-card">
-                        <TaskGenerator onTaskCreated={fetchDashboardData} />
-                    </div>
-                </section>
-
-                <section className="tasks-pane">
-                    <div className="card list-card">
-                        <div className="card-header">
-                            <h3>Assigned Tasks</h3>
-                            <button className="view-all-btn">View All <ArrowRight size={14} /></button>
+            ) : (
+                <>
+                    <div className="stats-container">
+                        <div className="stat-card-premium">
+                            <div className="stat-main">
+                                <div className="stat-label">Students</div>
+                                <div className="stat-value">{stats.students}</div>
+                            </div>
+                            <div className="stat-icon-box blue"><Users /></div>
+                            <div className="stat-trend positive">+12% from last month</div>
                         </div>
-                        <div className="tasks-scroll-area">
-                            {recentTasks.map(task => (
-                                <div key={task._id} className="task-row-premium">
-                                    {editingTask === task._id ? (
-                                        <form className="task-edit-inline" onSubmit={handleUpdate}>
-                                            <input
-                                                type="text"
-                                                value={editForm.topic}
-                                                onChange={(e) => setEditForm({ ...editForm, topic: e.target.value })}
-                                                autoFocus
-                                            />
-                                            <div className="edit-btns">
-                                                <button type="submit" className="save-btn"><Save size={18} /></button>
-                                                <button type="button" onClick={() => setEditingTask(null)} className="cancel-btn"><X size={18} /></button>
-                                            </div>
-                                        </form>
-                                    ) : (
-                                        <>
-                                            <div className="task-info-main">
-                                                <span className="task-name">{task.topic}</span>
-                                                <span className="task-date-alt">{new Date(task.date).toLocaleDateString()}</span>
-                                            </div>
-                                            <div className="task-status-box">
-                                                <span className={`pill-badge ${task.difficulty.toLowerCase()}`}>
-                                                    {task.difficulty}
-                                                </span>
-                                                <div className="hover-actions">
-                                                    <button onClick={() => startEditing(task)}><Edit2 size={16} /></button>
-                                                    <button onClick={() => handleDeleteTask(task._id)} className="delete"><Trash2 size={16} /></button>
-                                                </div>
-                                            </div>
-                                        </>
+
+                        <div className="stat-card-premium">
+                            <div className="stat-main">
+                                <div className="stat-label">Total Tasks</div>
+                                <div className="stat-value">{stats.tasks}</div>
+                            </div>
+                            <div className="stat-icon-box purple"><ClipboardList /></div>
+                            <div className="stat-trend positive">+5 new today</div>
+                        </div>
+
+                        <div className="stat-card-premium">
+                            <div className="stat-main">
+                                <div className="stat-label">Pending Reviews</div>
+                                <div className="stat-value">{stats.pending}</div>
+                            </div>
+                            <div className="stat-icon-box orange"><CheckCircle /></div>
+                            <div className="stat-trend negative">Requires attention</div>
+                        </div>
+
+                        <div className="stat-card-premium">
+                            <div className="stat-main">
+                                <div className="stat-label">Avg. Engagement</div>
+                                <div className="stat-value">84%</div>
+                            </div>
+                            <div className="stat-icon-box green"><TrendingUp /></div>
+                            <div className="stat-trend positive">Above average</div>
+                        </div>
+                    </div>
+
+                    <div className="dashboard-grid">
+                        <section className="generator-pane">
+                            <div className="card glass-card">
+                                <TaskGenerator onTaskCreated={fetchDashboardData} />
+                            </div>
+                        </section>
+
+                        <section className="tasks-pane">
+                            <div className="card list-card">
+                                <div className="card-header">
+                                    <h3>Assigned Tasks</h3>
+                                    <button className="view-all-btn">View All <ArrowRight size={14} /></button>
+                                </div>
+                                <div className="tasks-scroll-area">
+                                    {recentTasks.map(task => (
+                                        <div key={task._id} className="task-row-premium">
+                                            {editingTask === task._id ? (
+                                                <form className="task-edit-inline" onSubmit={handleUpdate}>
+                                                    <input
+                                                        type="text"
+                                                        value={editForm.topic}
+                                                        onChange={(e) => setEditForm({ ...editForm, topic: e.target.value })}
+                                                        autoFocus
+                                                    />
+                                                    <div className="edit-btns">
+                                                        <button type="submit" className="save-btn"><Save size={18} /></button>
+                                                        <button type="button" onClick={() => setEditingTask(null)} className="cancel-btn"><X size={18} /></button>
+                                                    </div>
+                                                </form>
+                                            ) : (
+                                                <>
+                                                    <div className="task-info-main">
+                                                        <span className="task-name">{task.topic}</span>
+                                                        <span className="task-date-alt">{new Date(task.date).toLocaleDateString()}</span>
+                                                    </div>
+                                                    <div className="task-status-box">
+                                                        <span className={`pill-badge ${task.difficulty.toLowerCase()}`}>
+                                                            {task.difficulty}
+                                                        </span>
+                                                        <div className="hover-actions">
+                                                            <button onClick={() => startEditing(task)}><Edit2 size={16} /></button>
+                                                            <button onClick={() => handleDeleteTask(task._id)} className="delete"><Trash2 size={16} /></button>
+                                                        </div>
+                                                    </div>
+                                                </>
+                                            )}
+                                        </div>
+                                    ))}
+                                    {recentTasks.length === 0 && (
+                                        <div className="empty-state">
+                                            <ClipboardList size={40} />
+                                            <p>No tasks found. Try generating one!</p>
+                                        </div>
                                     )}
                                 </div>
-                            ))}
-                            {recentTasks.length === 0 && (
-                                <div className="empty-state">
-                                    <ClipboardList size={40} />
-                                    <p>No tasks found. Try generating one!</p>
-                                </div>
-                            )}
-                        </div>
+                            </div>
+                        </section>
                     </div>
-                </section>
-            </div>
+                </>
+            )}
 
             {showStaffModal && (
                 <div className="modal-overlay">
@@ -279,6 +292,8 @@ const TeacherDashboard = () => {
                 .staff-form { display: flex; flex-direction: column; gap: 15px; }
                 .staff-form input { padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: rgba(15, 23, 42, 0.6); color: white; outline: none; }
                 .staff-form input:focus { border-color: var(--primary); }
+                .loader-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem; gap: 1rem; color: var(--text-muted); text-align: center; }
+                .main-loader { min-height: 400px; }
             `}</style>
         </div>
     );

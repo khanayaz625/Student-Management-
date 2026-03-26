@@ -44,6 +44,16 @@ const Profile = () => {
         }
     };
 
+    if (!user) return (
+        <div className="loader-state main-loader">
+            <Loader2 className="animate-spin" size={48} color="var(--primary)" />
+            <p>Loading your profile details...</p>
+            <style jsx>{`
+                .loader-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem; gap: 1rem; color: var(--text-muted); text-align: center; min-height: 400px; }
+            `}</style>
+        </div>
+    );
+
     return (
         <div className="profile-page">
             <header className="page-header">

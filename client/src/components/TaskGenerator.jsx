@@ -5,6 +5,7 @@ import { Sparkles, Loader2, Calendar } from 'lucide-react';
 const TaskGenerator = ({ onTaskCreated }) => {
     const [topic, setTopic] = useState('');
     const [difficulty, setDifficulty] = useState('Beginner');
+    const [technology, setTechnology] = useState('All');
     const [deadline, setDeadline] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -15,7 +16,7 @@ const TaskGenerator = ({ onTaskCreated }) => {
         setError('');
         try {
             const { data } = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tasks/generate`, {
-                topic, difficulty, deadline
+                topic, difficulty, deadline, technology
             });
             onTaskCreated(data);
             setTopic('');
@@ -54,12 +55,23 @@ const TaskGenerator = ({ onTaskCreated }) => {
                     </div>
 
                     <div className="form-group">
-                        <label>Submission Deadline</label>
-                        <input
-                            type="datetime-local"
-                            value={deadline} onChange={(e) => setDeadline(e.target.value)} required
-                        />
+                        <label>Assign to Technology</label>
+                        <select value={technology} onChange={(e) => setTechnology(e.target.value)}>
+                            <option value="All">All Students</option>
+                            <option value="Python">Python</option>
+                            <option value="MERN">MERN</option>
+                            <option value="PHP">PHP</option>
+                            <option value="Java">Java</option>
+                        </select>
                     </div>
+                </div>
+
+                <div className="form-group">
+                    <label>Submission Deadline</label>
+                    <input
+                        type="datetime-local"
+                        value={deadline} onChange={(e) => setDeadline(e.target.value)} required
+                    />
                 </div>
 
                 <button type="submit" className="btn-primary gen-btn" disabled={loading}>

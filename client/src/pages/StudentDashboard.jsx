@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import AttendanceCard from '../components/AttendanceCard';
-import { Award, TrendingUp, Clock, Calendar, CheckCircle, ArrowRight } from 'lucide-react';
+import { Award, TrendingUp, Clock, Calendar, CheckCircle, ArrowRight, Loader2 } from 'lucide-react';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import { useAuth } from '../context/AuthContext';
+import { Link } from 'react-router-dom';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
@@ -13,12 +13,14 @@ const StudentDashboard = () => {
     const [task, setTask] = useState(null);
     const [isMarked, setIsMarked] = useState(false);
     const [stats, setStats] = useState({ completion: 0, attendance: 0, rank: '-' });
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         if (user) fetchDashboardData();
     }, [user]);
 
     const fetchDashboardData = async () => {
+        setLoading(true);
         try {
             const [taskRes, attRes, subRes, leaderRes] = await Promise.all([
                 axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tasks/today`),
@@ -40,6 +42,8 @@ const StudentDashboard = () => {
             });
         } catch (err) {
             console.error('Error fetching dashboard data', err);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -72,121 +76,130 @@ const StudentDashboard = () => {
                 </div>
             </header>
 
-            <div className="stats-container">
-                <div className="stat-card-premium">
-                    <div className="stat-main">
-                        <div className="stat-label">Completion</div>
-                        <div className="stat-value">{stats.completion}%</div>
-                    </div>
-                    <div className="stat-icon-box purple"><CheckCircle /></div>
-                    <div className="progress-bar-mini">
-                        <div className="progress-fill" style={{ width: `${stats.completion}%` }}></div>
-                    </div>
+            {loading ? (
+                <div className="loader-state main-loader">
+                    <Loader2 className="animate-spin" size={48} color="var(--primary)" />
+                    <p>Building your personalized dashboard...</p>
                 </div>
-
-                <div className="stat-card-premium">
-                    <div className="stat-main">
-                        <div className="stat-label">Attendance</div>
-                        <div className="stat-value">{stats.attendance}%</div>
-                    </div>
-                    <div className="stat-icon-box blue"><Calendar /></div>
-                    <div className="progress-bar-mini">
-                        <div className="progress-fill" style={{ width: `${stats.attendance}%`, background: '#3b82f6' }}></div>
-                    </div>
-                </div>
-
-                <div className="stat-card-premium">
-                    <div className="stat-main">
-                        <div className="stat-label">Current Rank</div>
-                        <div className="stat-value">#{stats.rank}</div>
-                    </div>
-                    <div className="stat-icon-box orange"><Award /></div>
-                    <div className="stat-trend positive">Top 15%</div>
-                </div>
-            </div>
-
-            <div className="dashboard-grid">
-                <div className="left-column">
-                    <div className="card highlight-card">
-                        <div className="card-header">
-                            <h3>Today's Learning Objective</h3>
-                            <span className="live-tag">NEW</span>
+            ) : (
+                <>
+                    <div className="stats-container">
+                        <div className="stat-card-premium">
+                            <div className="stat-main">
+                                <div className="stat-label">Completion</div>
+                                <div className="stat-value">{stats.completion}%</div>
+                            </div>
+                            <div className="stat-icon-box purple"><CheckCircle /></div>
+                            <div className="progress-bar-mini">
+                                <div className="progress-fill" style={{ width: `${stats.completion}%` }}></div>
+                            </div>
                         </div>
-                        {task ? (
-                            <div className="task-focus-content">
-                                <h4 className="task-name-large">{task.topic}</h4>
-                                <p className="task-description">
-                                    Complete the subjective assessment to earn progress points.
-                                    AI generation has tailored this for your skill level.
-                                </p>
-                                <div className="task-meta-list">
-                                    <div className="meta-item">
-                                        <Clock size={16} />
-                                        <span>Due by {new Date(task.deadline).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                                    </div>
-                                    <div className="meta-item">
-                                        <TrendingUp size={16} />
-                                        <span>Difficultly: {task.difficulty}</span>
-                                    </div>
+
+                        <div className="stat-card-premium">
+                            <div className="stat-main">
+                                <div className="stat-label">Attendance</div>
+                                <div className="stat-value">{stats.attendance}%</div>
+                            </div>
+                            <div className="stat-icon-box blue"><Calendar /></div>
+                            <div className="progress-bar-mini">
+                                <div className="progress-fill" style={{ width: `${stats.attendance}%`, background: '#3b82f6' }}></div>
+                            </div>
+                        </div>
+
+                        <div className="stat-card-premium">
+                            <div className="stat-main">
+                                <div className="stat-label">Current Rank</div>
+                                <div className="stat-value">#{stats.rank}</div>
+                            </div>
+                            <div className="stat-icon-box orange"><Award /></div>
+                            <div className="stat-trend positive">Top 15%</div>
+                        </div>
+                    </div>
+
+                    <div className="dashboard-grid">
+                        <div className="left-column">
+                            <div className="card highlight-card">
+                                <div className="card-header">
+                                    <h3>Today's Learning Objective</h3>
+                                    <span className="live-tag">NEW</span>
                                 </div>
-                                <button className="btn-primary-large" onClick={() => window.location.href = '/tasks'}>
-                                    Begin Learning Session <ArrowRight size={18} />
-                                </button>
+                                {task ? (
+                                    <div className="task-focus-content">
+                                        <h4 className="task-name-large">{task.topic}</h4>
+                                        <p className="task-description">
+                                            Complete the subjective assessment to earn progress points.
+                                            AI generation has tailored this for your skill level.
+                                        </p>
+                                        <div className="task-meta-list">
+                                            <div className="meta-item">
+                                                <Clock size={16} />
+                                                <span>Due by {new Date(task.deadline).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                            </div>
+                                            <div className="meta-item">
+                                                <TrendingUp size={16} />
+                                                <span>Difficultly: {task.difficulty}</span>
+                                            </div>
+                                        </div>
+                                        <Link to="/tasks" className="btn-primary-large">
+                                            Begin Learning Session <ArrowRight size={18} />
+                                        </Link>
+                                    </div>
+                                ) : (
+                                    <div className="empty-state">
+                                        <p>No active tasks for today. Check your curriculum for updates.</p>
+                                    </div>
+                                )}
                             </div>
-                        ) : (
-                            <div className="empty-state">
-                                <p>No active tasks for today. Check your curriculum for updates.</p>
-                            </div>
-                        )}
-                    </div>
 
-                    <div className="card chart-card-premium">
-                        <div className="card-header">
-                            <h3>Performance Analytics</h3>
-                            <select className="chart-select">
-                                <option>Last 7 Days</option>
-                                <option>Last 30 Days</option>
-                            </select>
-                        </div>
-                        <div className="chart-wrapper">
-                            <Line data={chartData} options={{
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: { legend: { display: false } },
-                                scales: {
-                                    y: { display: false },
-                                    x: { grid: { display: false } }
-                                }
-                            }} />
-                        </div>
-                    </div>
-                </div>
-
-                <div className="right-column">
-                    <div className="glass-container">
-                        <AttendanceCard isMarked={isMarked} onMarked={() => setIsMarked(true)} />
-                    </div>
-
-                    <div className="card feedback-card-premium">
-                        <div className="card-header">
-                            <h3>Mentor Feedback</h3>
-                        </div>
-                        <div className="feedback-content">
-                            <div className="mentor-avatar">👨‍🏫</div>
-                            <div className="feedback-body">
-                                <div className="feedback-topic">Async/Await Patterns</div>
-                                <p>"Your implementation of try/catch blocks is much cleaner now. Keep practicing error handling."</p>
-                                <div className="feedback-footer">
-                                    <span className="score-badge">9/10</span>
-                                    <span className="time-ago">2 days ago</span>
+                            <div className="card chart-card-premium">
+                                <div className="card-header">
+                                    <h3>Performance Analytics</h3>
+                                    <select className="chart-select">
+                                        <option>Last 7 Days</option>
+                                        <option>Last 30 Days</option>
+                                    </select>
+                                </div>
+                                <div className="chart-wrapper">
+                                    <Line data={chartData} options={{
+                                        responsive: true,
+                                        maintainAspectRatio: false,
+                                        plugins: { legend: { display: false } },
+                                        scales: {
+                                            y: { display: false },
+                                            x: { grid: { display: false } }
+                                        }
+                                    }} />
                                 </div>
                             </div>
                         </div>
+
+                        <div className="right-column">
+                            {/* Attendance moved to Navbar */}
+                            <div className="card info-card-premium">
+                                <div className="card-header">
+                                    <h3>Quick Stats</h3>
+                                </div>
+                                <div className="quick-stats-list">
+                                    <div className="qs-item">
+                                        <span>Current Technology</span>
+                                        <strong>{user?.technology || 'MERN Stack'}</strong>
+                                    </div>
+                                    <div className="qs-item">
+                                        <span>Learning Path</span>
+                                        <strong>Web Development</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
+                </>
+            )}
 
             <style jsx>{`
+                .qs-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+                .qs-item:last-child { border-bottom: none; }
+                .qs-item span { color: var(--text-muted); }
+                .qs-item strong { color: var(--text-main); }
                 .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
                 .page-header h1 { font-size: 2.2rem; margin-bottom: 6px; }
                 .page-header p { color: var(--text-muted); font-size: 1.05rem; }
@@ -247,6 +260,8 @@ const StudentDashboard = () => {
                     .task-meta-list { flex-direction: column; gap: 10px; }
                     .btn-primary-large { width: 100%; justify-content: center; }
                 }
+                .loader-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem; gap: 1rem; color: var(--text-muted); text-align: center; }
+                .main-loader { min-height: 400px; }
             `}</style>
         </div>
     );

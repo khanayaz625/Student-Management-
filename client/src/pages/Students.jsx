@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Search, Eye, Edit3, Check, X, Trash2, UserPlus, Sparkles, ClipboardList } from 'lucide-react';
+import { Search, Eye, Edit3, Check, X, Trash2, UserPlus, Sparkles, ClipboardList, Loader2 } from 'lucide-react';
 
 const Students = () => {
     const [students, setStudents] = useState([]);
@@ -50,6 +50,7 @@ const Students = () => {
     };
 
     const viewSubmissions = async (student) => {
+        setLoading(true);
         setSelectedStudent(student);
         try {
             const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/submissions/student/${student._id}`);
@@ -58,6 +59,8 @@ const Students = () => {
         } catch (err) {
             alert('Error fetching student submissions');
             console.error(err);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -118,45 +121,52 @@ const Students = () => {
             </div>
 
             <div className="card students-card">
-                <div className="table-responsive">
-                    <table className="students-table">
-                        <thead>
-                            <tr>
-                                <th>Student</th>
-                                <th>Enrollment No</th>
-                                <th>Technology</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredStudents.map(student => (
-                                <tr key={student._id}>
-                                    <td>
-                                        <div className="student-profile">
-                                            <div className="mini-avatar">{student.name.charAt(0)}</div>
-                                            <div className="name-box">
-                                                <span className="s-name">{student.name}</span>
-                                                <span className="s-email">{student.email}</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>{student.enrollmentNo || 'N/A'}</td>
-                                    <td>{student.technology || 'N/A'}</td>
-                                    <td>
-                                        <div className="action-row">
-                                            <button className="icon-btn view-btn" onClick={() => viewSubmissions(student)} title="View Submissions">
-                                                <Eye size={18} />
-                                            </button>
-                                            <button className="icon-btn delete-btn" onClick={() => handleDelete(student._id)} title="Remove Student">
-                                                <Trash2 size={18} />
-                                            </button>
-                                        </div>
-                                    </td>
+                {loading && !showSubmissionModal ? (
+                    <div className="loader-state">
+                        <Loader2 className="animate-spin" size={40} color="var(--primary)" />
+                        <p>Loading student records...</p>
+                    </div>
+                ) : (
+                    <div className="table-responsive">
+                        <table className="students-table">
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Enrollment No</th>
+                                    <th>Technology</th>
+                                    <th>Actions</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                            </thead>
+                            <tbody>
+                                {filteredStudents.map(student => (
+                                    <tr key={student._id}>
+                                        <td>
+                                            <div className="student-profile">
+                                                <div className="mini-avatar">{student.name.charAt(0)}</div>
+                                                <div className="name-box">
+                                                    <span className="s-name">{student.name}</span>
+                                                    <span className="s-email">{student.email}</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>{student.enrollmentNo || 'N/A'}</td>
+                                        <td>{student.technology || 'N/A'}</td>
+                                        <td>
+                                            <div className="action-row">
+                                                <button className="icon-btn view-btn" onClick={() => viewSubmissions(student)} title="View Submissions">
+                                                    <Eye size={18} />
+                                                </button>
+                                                <button className="icon-btn delete-btn" onClick={() => handleDelete(student._id)} title="Remove Student">
+                                                    <Trash2 size={18} />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
             </div>
 
             {showSubmissionModal && (
@@ -369,6 +379,7 @@ const Students = () => {
           .modal-content { width: 95%; margin: 1rem; padding: 1rem; }
           .submission-modal { padding: 1rem; }
         }
+        .loader-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem; gap: 1rem; color: var(--text-muted); text-align: center; }
       `}</style>
         </div>
     );

@@ -8,7 +8,7 @@ const DailyTask = () => {
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
     const [task, setTask] = useState(null);
     const [answers, setAnswers] = useState([]);
-    const [status, setStatus] = useState('idle'); // idle, loading, submitted, error
+    const [status, setStatus] = useState('fetching'); // fetching, idle, loading, submitted, error
     const [submission, setSubmission] = useState(null);
 
     const [isEditing, setIsEditing] = useState(false);
@@ -24,14 +24,19 @@ const DailyTask = () => {
     }, [task]);
 
     const fetchTask = async () => {
+        setStatus('fetching');
         try {
             const { data } = await axios.get(`${apiUrl}/api/tasks/today`);
             setTask(data);
             if (data) {
                 setAnswers(data.questions.map((_, i) => ({ questionIndex: i, answer: '' })));
+                setStatus('idle');
+            } else {
+                setStatus('idle');
             }
         } catch (err) {
             console.error(err);
+            setStatus('error');
         }
     };
 
@@ -90,7 +95,25 @@ const DailyTask = () => {
         return 100;
     };
 
-    if (!task) return <div className="loading-state"><p>No task assigned for today yet.</p></div>;
+    if (status === 'fetching') return (
+        <div className="loader-state main-loader">
+            <Loader2 className="animate-spin" size={48} color="var(--primary)" />
+            <p>Scanning for today's tasks...</p>
+            <style jsx>{`
+                .loader-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem; gap: 1rem; color: var(--text-muted); text-align: center; min-height: 400px; }
+            `}</style>
+        </div>
+    );
+
+    if (!task) return (
+        <div className="loader-state main-loader">
+            <AlertCircle size={48} color="var(--text-muted)" />
+            <p>No task assigned for today yet.</p>
+            <style jsx>{`
+                .loader-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem; gap: 1rem; color: var(--text-muted); text-align: center; min-height: 400px; }
+            `}</style>
+        </div>
+    );
 
     const totalProgress = answers.reduce((acc, curr) => acc + calculateAccuracy(curr.answer), 0) / (answers.length || 1);
 

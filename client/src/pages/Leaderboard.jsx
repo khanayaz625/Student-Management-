@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Trophy, Medal, Star } from 'lucide-react';
+import { Trophy, Medal, Star, Loader2 } from 'lucide-react';
 
 const Leaderboard = () => {
     const [students, setStudents] = useState([]);
@@ -11,6 +11,7 @@ const Leaderboard = () => {
     }, []);
 
     const fetchLeaderboard = async () => {
+        setLoading(true);
         try {
             const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
             const { data } = await axios.get(`${apiUrl}/api/users/leaderboard`);
@@ -18,7 +19,7 @@ const Leaderboard = () => {
         } catch (err) {
             console.error(err);
         } finally {
-            setLoading(true);
+            setLoading(false);
         }
     };
 
@@ -37,40 +38,43 @@ const Leaderboard = () => {
             </header>
 
             <div className="card leaderboard-card">
-                <div className="table-responsive">
-                    <table className="leaderboard-table">
-                        <thead>
-                            <tr>
-                                <th>Rank</th>
-                                <th>Student Name</th>
-                                <th>Enrollment No</th>
-                                <th>Attendance</th>
-                                <th>Completion</th>
-                                <th>Avg. Score</th>
-                                <th>Total Points</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {students.map((student, idx) => (
-                                <tr key={student._id} className={idx < 3 ? `top-rank rank-${idx}` : ''}>
-                                    <td className="rank-cell">{getRankIcon(idx)}</td>
-                                    <td className="name-cell">
-                                        <div className="student-info">
-                                            <div className="avatar">{student.name.charAt(0)}</div>
-                                            <span>{student.name}</span>
-                                        </div>
-                                    </td>
-                                    <td>{student.enrollmentNo || 'N/A'}</td>
-                                    <td><span className="rate-badge">{student.attendanceRate}%</span></td>
-                                    <td><span className="rate-badge">{student.completionRate}%</span></td>
-                                    <td>{student.avgScore}/10</td>
-                                    <td className="score-cell"><strong>{student.score}</strong></td>
+                {loading ? (
+                    <div className="loader-state">
+                        <Loader2 className="animate-spin" size={40} color="var(--primary)" />
+                        <p>Fetching the latest rankings...</p>
+                    </div>
+                ) : (
+                    <div className="table-responsive">
+                        <table className="leaderboard-table">
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Student Name</th>
+                                    <th>Enrollment No</th>
+                                    <th>Score</th>
+                                    <th>Attendance</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                    {students.length === 0 && <div className="empty-table">No data available yet.</div>}
-                </div>
+                            </thead>
+                            <tbody>
+                                {students.map((student, idx) => (
+                                    <tr key={student._id} className={idx < 3 ? `top-rank rank-${idx}` : ''}>
+                                        <td className="rank-cell">{getRankIcon(idx)}</td>
+                                        <td className="name-cell">
+                                            <div className="student-info">
+                                                <div className="avatar">{student.name.charAt(0)}</div>
+                                                <span>{student.name}</span>
+                                            </div>
+                                        </td>
+                                        <td>{student.enrollmentNo || 'N/A'}</td>
+                                        <td><span className="score-badge-alt">{student.avgScore}/10</span></td>
+                                        <td><span className="rate-badge">{student.attendanceRate}%</span></td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                        {students.length === 0 && <div className="empty-table">No data available yet.</div>}
+                    </div>
+                )}
             </div>
 
             <style jsx>{`
@@ -83,13 +87,15 @@ const Leaderboard = () => {
         .student-info { display: flex; align-items: center; gap: 1rem; }
         .avatar { width: 32px; height: 32px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; }
         
-        .rate-badge { background: var(--bg-main); padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+        .rate-badge { background: var(--bg-main); padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); }
+        .score-badge-alt { background: rgba(99, 102, 241, 0.1); padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; color: var(--primary); }
         .score-cell { color: var(--primary); font-size: 1.1rem; }
         
         .top-rank { background: rgba(99, 102, 241, 0.03); }
         .rank-0 { background: rgba(251, 191, 36, 0.05); }
         
         .empty-table { padding: 3rem; text-align: center; color: var(--text-muted); }
+        .loader-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem; gap: 1rem; color: var(--text-muted); }
       `}</style>
         </div>
     );

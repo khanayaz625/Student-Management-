@@ -8,7 +8,7 @@ const { generateQuestions } = require('../utils/aiGenerator');
 
 // Generate and Save Task
 router.post('/generate', protect, teacherOnly, async (req, res) => {
-    const { topic, difficulty, deadline } = req.body;
+    const { topic, difficulty, deadline, technology } = req.body;
     try {
         const questions = await generateQuestions(topic, difficulty);
 
@@ -18,6 +18,7 @@ router.post('/generate', protect, teacherOnly, async (req, res) => {
 
         // One task per day check
         const existingTask = await Task.findOne({
+            technology: technology || 'All',
             date: {
                 $gte: today,
                 $lt: new Date(today.getTime() + 24 * 60 * 60 * 1000)
@@ -34,11 +35,13 @@ router.post('/generate', protect, teacherOnly, async (req, res) => {
             difficulty,
             questions,
             deadline: new Date(deadline),
+            technology: technology || 'All',
             date: today
         });
 
         // Notify Students
-        const students = await User.find({ role: 'student' });
+        const filter = (technology && technology !== 'All') ? { role: 'student', technology } : { role: 'student' };
+        const students = await User.find(filter);
         const notifications = students.map(student => ({
             recipient: student._id,
             sender: req.user._id,
@@ -60,7 +63,10 @@ router.get('/today', protect, async (req, res) => {
     today.setHours(0, 0, 0, 0);
 
     try {
-        const task = await Task.findOne().sort({ createdAt: -1 });
+        const filter = req.user.role === 'student' ? {
+            $or: [{ technology: req.user.technology }, { technology: 'All' }]
+        } : {};
+        const task = await Task.findOne(filter).sort({ createdAt: -1 });
         res.json(task);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching today task' });

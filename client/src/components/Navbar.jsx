@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { LogOut, Bell, Sun, Moon, Menu, X, CheckSquare, MessageSquare, ChevronDown } from 'lucide-react';
@@ -9,14 +9,52 @@ const Navbar = () => {
   const { theme, toggleTheme, toggleSidebar, isSidebarOpen } = useTheme();
   const [notifications, setNotifications] = useState([]);
   const [showNotif, setShowNotif] = useState(false);
-
+  const [isAttendanceMarked, setIsAttendanceMarked] = useState(false);
+  const [markingAttendance, setMarkingAttendance] = useState(false);
+  const notificationRef = useRef(null);
   useEffect(() => {
     if (user) {
       fetchNotifications();
+      if (user.role === 'student') checkAttendance();
       const interval = setInterval(fetchNotifications, 30000);
-      return () => clearInterval(interval);
+
+      const handleClickOutside = (event) => {
+        if (notificationRef.current && !notificationRef.current.contains(event.target)) {
+          setShowNotif(false);
+        }
+      };
+      document.addEventListener('mousedown', handleClickOutside);
+
+      return () => {
+        clearInterval(interval);
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
     }
   }, [user]);
+
+  const checkAttendance = async () => {
+    try {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/attendance/my`);
+      const today = new Date().toISOString().split('T')[0];
+      const marked = data.some(a => a.date === today);
+      setIsAttendanceMarked(marked);
+    } catch (error) {
+      console.error('Error checking attendance');
+    }
+  };
+
+  const markAttendance = async () => {
+    setMarkingAttendance(true);
+    try {
+      await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/attendance/mark`);
+      setIsAttendanceMarked(true);
+      alert('Attendance marked successfully!');
+    } catch (error) {
+      alert(error.response?.data?.message || 'Error marking attendance');
+    } finally {
+      setMarkingAttendance(false);
+    }
+  };
 
   const fetchNotifications = async () => {
     try {
@@ -38,10 +76,10 @@ const Navbar = () => {
 
   const markAllRead = async () => {
     try {
-      await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/notifications/read-all`);
-      setNotifications(notifications.map(n => ({ ...n, isRead: true })));
+      await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/notifications/clear-all`);
+      setNotifications([]);
     } catch (error) {
-      console.error('Error marking all as read');
+      console.error('Error clearing all notifications');
     }
   };
 
@@ -56,6 +94,15 @@ const Navbar = () => {
         <div className="navbar-brand">
           <span className="logo-text">DigiSkill<span className="logo-dot">.</span></span>
         </div>
+        {user?.role === 'student' && (
+          <button 
+            className={`nav-attendance-btn ${isAttendanceMarked ? 'marked' : ''}`}
+            onClick={markAttendance}
+            disabled={isAttendanceMarked || markingAttendance}
+          >
+            {markingAttendance ? <Loader2 className="animate-spin" size={16} /> : (isAttendanceMarked ? '✓ Present' : 'Mark as Present')}
+          </button>
+        )}
       </div>
 
       <div className="navbar-actions">
@@ -66,7 +113,7 @@ const Navbar = () => {
 
           <div className="divider"></div>
 
-          <div className="notification-wrapper">
+          <div className="notification-wrapper" ref={notificationRef}>
             <button className="notif-btn" onClick={() => setShowNotif(!showNotif)}>
               <Bell size={18} />
               {unreadCount > 0 && <span className="unread-badge">{unreadCount}</span>}
@@ -144,6 +191,31 @@ const Navbar = () => {
         .navbar-brand { cursor: default; }
         .logo-text { font-family: 'Outfit', sans-serif; font-size: 1.4rem; font-weight: 800; color: var(--text-main); }
         .logo-dot { color: var(--primary); }
+
+        .nav-attendance-btn {
+            margin-left: 1rem;
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), #4f46e5);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 4px 12px var(--primary-glow);
+        }
+        .nav-attendance-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px var(--primary-glow);
+        }
+        .nav-attendance-btn.marked {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            box-shadow: none;
+            cursor: default;
+        }
 
         .navbar-actions { display: flex; align-items: center; gap: 1rem; }
         

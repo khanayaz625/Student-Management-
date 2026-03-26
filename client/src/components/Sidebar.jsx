@@ -127,20 +127,6 @@ const Sidebar = () => {
             right: 16px;
         }
 
-        .sidebar-promo { margin-top: auto; padding-top: 24px; }
-        .promo-card {
-            background: linear-gradient(135deg, #1e1b4b, #312e81);
-            padding: 20px;
-            border-radius: 16px;
-            color: white;
-            position: relative;
-            overflow: hidden;
-        }
-        .promo-card h4 { font-size: 0.9rem; margin: 10px 0 4px; }
-        .promo-card p { font-size: 0.75rem; color: #a5b4fc; margin-bottom: 12px; line-height: 1.4; }
-        .spark-icon { width: 30px; height: 30px; background: rgba(255,255,255,0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fbbf24; }
-        .upgrade-btn { width: 100%; padding: 8px; background: white; color: #1e1b4b; font-size: 0.8rem; font-weight: 700; border-radius: 8px; }
-
         .sidebar-overlay {
           display: none;
           position: fixed;

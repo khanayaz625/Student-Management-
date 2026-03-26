@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Calendar, User, Clock, CheckCircle, XCircle, Search } from 'lucide-react';
+import { Calendar, User, Clock, CheckCircle, XCircle, Search, Loader2 } from 'lucide-react';
 
 const AttendanceAdmin = () => {
     const [students, setStudents] = useState([]);
@@ -82,7 +82,10 @@ const AttendanceAdmin = () => {
 
             <div className="attendance-grid">
                 {loading ? (
-                    <div className="loading-msg">Loading records...</div>
+                    <div className="loader-state main-loader">
+                        <Loader2 className="animate-spin" size={48} color="var(--primary)" />
+                        <p>Loading attendance records...</p>
+                    </div>
                 ) : (
                     filteredStudents.map(student => {
                         const { status, time } = getAttendanceStatus(student._id);
@@ -156,6 +159,8 @@ const AttendanceAdmin = () => {
                     .page-header { flex-direction: column; align-items: flex-start; }
                     .date-picker-wrapper { width: 100%; }
                 }
+                .loader-state { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem; gap: 1rem; color: var(--text-muted); text-align: center; }
+                .main-loader { min-height: 400px; }
             `}</style>
         </div>
     );

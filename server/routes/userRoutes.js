@@ -97,11 +97,11 @@ router.get('/leaderboard', protect, async (req, res) => {
             const attendance = await Attendance.find({ studentId: student._id });
 
             const completedTasks = submissions.filter(s => s.status !== 'Pending').length;
-            const completionRate = (completedTasks / totalTasks) * 100;
+            const completionRate = Math.min((completedTasks / totalTasks) * 100, 100);
             const avgScore = submissions.reduce((acc, curr) => acc + (curr.score || 0), 0) / (submissions.length || 1);
-            const attendanceRate = (attendance.length / totalTasks) * 100;
+            const attendanceRate = Math.min((attendance.length / totalTasks) * 100, 100);
 
-            const totalScore = (attendanceRate * 0.3) + (completionRate * 0.4) + (avgScore * 0.3);
+            const totalScore = (attendanceRate * 0.4) + (completionRate * 0.4) + (avgScore * 10);
 
             return {
                 _id: student._id,

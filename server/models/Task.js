@@ -10,6 +10,7 @@ const taskSchema = new mongoose.Schema({
     }],
     date: { type: Date, default: Date.now },
     deadline: { type: Date, required: true },
+    technology: { type: String, default: 'All' },
     createdAt: { type: Date, default: Date.now }
 });
 
