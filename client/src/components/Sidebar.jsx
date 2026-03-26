@@ -10,7 +10,7 @@ const Sidebar = () => {
 
   const menuItems = [
     { name: 'Dashboard', icon: <LayoutDashboard size={18} />, path: '/' },
-    { name: 'Daily Tasks', icon: <ClipboardList size={18} />, path: '/tasks' },
+    ...(user?.role === 'student' ? [{ name: 'Daily Tasks', icon: <ClipboardList size={18} />, path: '/tasks' }] : []),
     { name: 'Leaderboard', icon: <Trophy size={18} />, path: '/leaderboard' },
     { name: 'Profile', icon: <UserCircle size={18} />, path: '/profile' },
   ];
